@@ -1,0 +1,123 @@
+#include<windows.h>
+#include<gl/glut.h>
+#include<gl/Gl.h>
+#include<math.h>
+
+const int screenHeight = 480;
+const int screenWidth = 640;
+const int radiusLimit = 100;
+const float PI = 3.14159265;
+int radius = 10, inc = 10;
+int X, Y;
+
+void myInit(void) 
+{
+	 glClearColor(1.0,1.0,1.0,0.0);
+	 glColor3f(0.0f,0.0f,0.0f);
+	 glPointSize(1.0);
+	 glMatrixMode(GL_PROJECTION);
+	 glLoadIdentity();
+	 gluOrtho2D(0.0,(GLdouble)screenWidth,0.0,(GLdouble)screenHeight);
+}
+
+void drawDot(GLint x, GLint y) 
+{
+	 glColor3f(1.0,0.0,0.0);
+	 glBegin(GL_POINTS);
+	 glVertex2i(x,y);
+	 glEnd();
+	 glFlush();
+}
+
+void animateRadius(void) 
+{
+	 int rad;
+	 if (radius >= 10 && radius <= radiusLimit) 
+	 {
+		 if (inc < 0)
+			 rad = radius + 10;
+		 else	
+			 rad = radius - 10;
+	 }
+
+	 int X2, Y2;
+	 double angleInRadian;
+	 for (GLint angleInDegree = 0; angleInDegree <= 360; angleInDegree++) 
+	 {
+		  glBegin(GL_LINES);
+		  angleInRadian = angleInDegree * (PI / 180);
+		  X2 = rad * cos(angleInRadian) + X;
+		  Y2 = rad * sin(angleInRadian) + Y;
+		  glVertex2i(X, Y);
+		  glVertex2i(X2, Y2);
+		  glEnd();		
+		  glFlush();
+	 }
+}
+
+void drawCircle(int mouseX, int mouseY) 
+{
+	 GLint X, Y; 
+	 double angleInRadian;
+	 for (GLint angleInDegree = 0; angleInDegree <= 360; angleInDegree++) 
+	 {
+		  glBegin(GL_POINTS);
+		  angleInRadian = angleInDegree * (PI / 180);
+		  X = radius * cos(angleInRadian) + mouseX;
+		  Y = radius * sin(angleInRadian) + mouseY;
+		  glVertex2i(X, Y);
+		  glFlush();
+		  glEnd();
+	 }
+	 glFinish();
+     
+	 radius +=inc;
+	 glutIdleFunc(animateRadius);
+
+	 if (radius >= radiusLimit)  
+	 {
+		 inc = -inc;
+	 } 
+	 else if (radius <= 10) 
+	 {
+		 inc = -inc;
+	 }
+}
+
+void myDisplay(void) 
+{
+	 glClear(GL_COLOR_BUFFER_BIT);
+	 glFlush();
+}
+
+void myMouse(int button,int state,int x,int y) 
+{
+	 if(button==GLUT_RIGHT_BUTTON && state==GLUT_DOWN) 
+	 {
+		exit(0);
+	 }
+	 
+	 else if(button==GLUT_LEFT_BUTTON && state==GLUT_DOWN) 
+	 {
+		X = x;
+		Y = screenHeight-y;
+		drawDot(x,screenHeight-y);
+		drawCircle(x,screenHeight-y);
+	 }		
+}
+
+void main(int argc, char** argv) 
+{
+	 glutInit(&argc,argv);
+	 glutInitDisplayMode(GLUT_SINGLE|GLUT_RGB);
+	 glutInitWindowSize(screenWidth,screenHeight);
+	 glutInitWindowPosition(0,10);
+	 glutCreateWindow("Drawing a Animated Circle");
+	 glutDisplayFunc(myDisplay);
+	 glutMouseFunc(myMouse);
+	 myInit();
+	 glutMainLoop();
+}
+
+
+
